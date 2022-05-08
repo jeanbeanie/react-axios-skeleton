@@ -1,82 +1,67 @@
-import React, { Component } from "react";
+import React, {useState, useEffect} from 'react';
 import ExampleDataService from "../services/example.service";
 import { Link } from "react-router-dom";
 
-export default class ExamplesList extends Component {
-  constructor(props) {
-    super(props);
-    this.onChangeSearchTitle = this.onChangeSearchTitle.bind(this);
-    this.retrieveExamples = this.retrieveExamples.bind(this);
-    this.refreshList = this.refreshList.bind(this);
-    this.setActiveExample = this.setActiveExample.bind(this);
-    this.removeAllExamples = this.removeAllExamples.bind(this);
-    this.searchTitle = this.searchTitle.bind(this);
-    this.state = {
-      examples: [],
-      currentExample: null,
-      currentIndex: -1,
-      searchTitle: ""
-    };
-  }
-  componentDidMount() {
-    this.retrieveExamples();
-  }
-  onChangeSearchTitle(e) {
-    const searchTitle = e.target.value;
-    this.setState({
-      searchTitle: searchTitle
-    });
-  }
-  retrieveExamples() {
+function ExamplesList(){
+  const [searchTitle, setSearchTitle] = useState("");
+  const [examples, setExamples] = useState([]);
+  const [currentExample, setCurrentExample] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState("");
+
+  useEffect(() => {
+    retrieveExamples();
+  }, []);
+
+  const retrieveExamples = () => {
     ExampleDataService.getAll()
       .then(response => {
-        this.setState({
-          examples: response.data
-        });
+        setExamples(response.data);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
   }
-  refreshList() {
-    this.retrieveExamples();
-    this.setState({
-      currentExample: null,
-      currentIndex: -1
-    });
+  
+  const handleChangeSearchTitle = (e) => {
+    const searchTitle = e.target.value;
+    setSearchTitle(searchTitle);
   }
-  setActiveExample(example, index) {
-    this.setState({
-      currentExample: example,
-      currentIndex: index
-    });
-  }
-  removeAllExamples() {
+
+  const handleSearchTitleSubmit = (e) => {
+    setCurrentExample(null);
+    ExampleDataService.findByTitle(searchTitle)
+      .then(response => {
+        setExamples(response.data);
+        console.log(response.data);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+
+  const setActiveExample = (example, index) => {
+    setCurrentExample(example);
+    setCurrentIndex(index);
+  };
+
+  const removeAllExamples = () => {
     ExampleDataService.deleteAll()
       .then(response => {
         console.log(response.data);
-        this.refreshList();
+        refreshList();
       })
       .catch(e => {
         console.log(e);
       });
-  }
-  searchTitle() {
-    ExampleDataService.findByTitle(this.state.searchTitle)
-      .then(response => {
-        this.setState({
-          examples: response.data
-        });
-        console.log(response.data);
-      })
-      .catch(e => {
-        console.log(e);
-      });
-  }
-  render() {
-    const { searchTitle, examples, currentExample, currentIndex } = this.state;
-    return (
+  };
+
+  const refreshList = () => {
+    setCurrentExample(null);
+    setCurrentIndex(-1);
+  };
+    
+  return (
       <div className="list row">
         <div>
           <div className="input-group">
@@ -85,13 +70,13 @@ export default class ExamplesList extends Component {
               className="form-control"
               placeholder="Search for example OBJ by title"
               value={searchTitle}
-              onChange={this.onChangeSearchTitle}
+              onChange={handleChangeSearchTitle}
             />
             <div>
               <button
                 className="btn btn-outline-secondary"
                 type="button"
-                onClick={this.searchTitle}
+                onClick={handleSearchTitleSubmit}
               >
                 Search
               </button>
@@ -108,7 +93,7 @@ export default class ExamplesList extends Component {
                     "list-group-item " +
                     (index === currentIndex ? "active" : "")
                   }
-                  onClick={() => this.setActiveExample(example, index)}
+                  onClick={() => setActiveExample(example, index)}
                   key={index}
                 >
                   {example.title}
@@ -154,11 +139,12 @@ export default class ExamplesList extends Component {
         </div>
           <button
             className="m-3 btn btn-sm btn-danger"
-            onClick={this.removeAllExamples}
+            onClick={removeAllExamples}
           >
             Remove All Example OBJS
           </button>
       </div>
     );
-  }
-}
+};  
+
+export default ExamplesList;
