@@ -113,21 +113,12 @@ function Example(){
                 {currentExample.published ? "Published" : "Pending"}
               </div>
             </form>
-            {currentExample.published ? (
-              <button
-                className="badge badge-primary mr-2"
-                onClick={() => updatePublished(false)}
-              >
-                UnPublish
-              </button>
-            ) : (
-              <button
-                className="badge badge-primary mr-2"
-                onClick={() => updatePublished(true)}
-              >
-                Publish
-              </button>
-            )}
+            <button
+              className="badge badge-primary mr-2"
+              onClick={()=> updatePublished(!currentExample.published)}
+            >
+              {currentExample.published ? "UnPublish" : "Publish"} 
+            </button>
             <button
               className="badge badge-danger mr-2"
               onClick={deleteExample}
