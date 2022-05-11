@@ -1,108 +1,85 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import ExampleDataService from "../services/example.service";
-export default class Example extends Component {
-  constructor(props) {
-    super(props);
-    this.onChangeTitle = this.onChangeTitle.bind(this);
-    this.onChangeDescription = this.onChangeDescription.bind(this);
-    this.getExample = this.getExample.bind(this);
-    this.updatePublished = this.updatePublished.bind(this);
-    this.updateExample = this.updateExample.bind(this);
-    this.deleteExample = this.deleteExample.bind(this);
-    this.state = {
-      currentExample: {
-        id: null,
-        title: "",
-        description: "",
-        published: false
-      },
-      message: ""
-    };
-  }
-  componentDidMount() {
-    this.getExample(this.props.match.params.id);
-  }
-  onChangeTitle(e) {
+import {useParams, useNavigate} from 'react-router-dom';
+
+function Example(){
+  let {id} = useParams();
+  let navigate = useNavigate();
+
+  const defaultExample = {
+    id,
+    title: "",
+    description: "",
+  };
+
+  const [currentExample, setCurrentExample] = useState(defaultExample);
+  const [message, setMessage] = useState("");
+  
+  useEffect(() => {
+    getExample(id);
+  }, []);
+
+
+  const onChangeTitle = (e) => {
     const title = e.target.value;
-    this.setState(function(prevState) {
-      return {
-        currentExample: {
-          ...prevState.currentExample,
-          title: title
-        }
-      };
-    });
+    setCurrentExample({...currentExample, title});
   }
-  onChangeDescription(e) {
+
+  const onChangeDescription = (e) => {
     const description = e.target.value;
-    
-    this.setState(prevState => ({
-      currentExample: {
-        ...prevState.currentExample,
-        description: description
-      }
-    }));
+    setCurrentExample({...currentExample, description})
   }
-  getExample(id) {
+
+  const getExample = (id) => {
     ExampleDataService.get(id)
       .then(response => {
-        this.setState({
-          currentExample: response.data
-        });
+        setCurrentExample(response.data);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
   }
-  updatePublished(status) {
+
+  const updatePublished = (status) => {
     var data = {
-      id: this.state.currentExample.id,
-      title: this.state.currentExample.title,
-      description: this.state.currentExample.description,
+      id,
+      title: currentExample.title,
+      description: currentExample.description,
       published: status
     };
-    ExampleDataService.update(this.state.currentExample.id, data)
+    ExampleDataService.update(id, data)
       .then(response => {
-        this.setState(prevState => ({
-          currentExample: {
-            ...prevState.currentExample,
-            published: status
-          }
-        }));
+        setCurrentExample({...data})
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
   }
-  updateExample() {
-    ExampleDataService.update(
-      this.state.currentExample.id,
-      this.state.currentExample
-    )
+
+  const updateExample = () => {
+    ExampleDataService.update(id, currentExample)
       .then(response => {
         console.log(response.data);
-        this.setState({
-          message: "The example was updated successfully!"
-        });
+        setMessage("The example was updated successfully!");
       })
       .catch(e => {
         console.log(e);
       });
   }
-  deleteExample() {    
-    ExampleDataService.delete(this.state.currentExample.id)
+
+  const deleteExample = () => {    
+    ExampleDataService.delete(id)
       .then(response => {
         console.log(response.data);
-        this.props.history.push('/examples')
+        navigate('../examples')
       })
       .catch(e => {
         console.log(e);
       });
   }
-  render() {
-const { currentExample } = this.state;
+  
     return (
       <div>
         {currentExample ? (
@@ -116,7 +93,7 @@ const { currentExample } = this.state;
                   className="form-control"
                   id="title"
                   value={currentExample.title}
-                  onChange={this.onChangeTitle}
+                  onChange={onChangeTitle}
                 />
               </div>
               <div className="form-group">
@@ -126,7 +103,7 @@ const { currentExample } = this.state;
                   className="form-control"
                   id="description"
                   value={currentExample.description}
-                  onChange={this.onChangeDescription}
+                  onChange={onChangeDescription}
                 />
               </div>
               <div className="form-group">
@@ -139,32 +116,32 @@ const { currentExample } = this.state;
             {currentExample.published ? (
               <button
                 className="badge badge-primary mr-2"
-                onClick={() => this.updatePublished(false)}
+                onClick={() => updatePublished(false)}
               >
                 UnPublish
               </button>
             ) : (
               <button
                 className="badge badge-primary mr-2"
-                onClick={() => this.updatePublished(true)}
+                onClick={() => updatePublished(true)}
               >
                 Publish
               </button>
             )}
             <button
               className="badge badge-danger mr-2"
-              onClick={this.deleteExample}
+              onClick={deleteExample}
             >
               Delete
             </button>
             <button
               type="submit"
               className="badge badge-success"
-              onClick={this.updateExample}
+              onClick={updateExample}
             >
               Update
             </button>
-            <p>{this.state.message}</p>
+            <p>{message}</p>
           </div>
         ) : (
           <div>
@@ -174,5 +151,6 @@ const { currentExample } = this.state;
         )}
       </div>
     );
-  }
 }
+
+export default Example;

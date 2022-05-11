@@ -30,10 +30,10 @@ class App extends Component {
         </nav>
         <div className="container mt-3">
           <Routes>
-            <Route exact path="/" element={<ExamplesList/>} />
-            <Route exact path="/examples" element={<ExamplesList/>} />
-            <Route exact path="/add" element={<AddExample/>} />
+            <Route path="/" element={<ExamplesList/>} />
             <Route path="/examples/:id" element={<Example/>} />
+            <Route path="/examples" element={<ExamplesList/>} />
+            <Route path="/add" element={<AddExample/>} />
           </Routes>
         </div>
       </div>
